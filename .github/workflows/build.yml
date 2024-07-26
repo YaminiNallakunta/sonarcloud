@@ -1,21 +1,37 @@
-name: Build
+name: CI
 on:
   push:
     branches:
       - master
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches:
+      - master
+
 jobs:
-  sonarcloud:
-    name: SonarCloud
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarcloud-github-action@v1.10
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: your-project-key
+          SONAR_ORGANIZATION: your-organization
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
